@@ -55,7 +55,7 @@ public class VelovAsyncTask extends AsyncTask<Object, Void, String> {
         stationsList = JsonParser.parseStations(response);
 
         for(Station station : stationsList){
-            Log.d("magrosseteub", station.toString());
+            Log.d("station", station.toString());
         }
 
         return response;

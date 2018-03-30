@@ -59,7 +59,7 @@ public class Station {
                 case "lat" :
                     lat = readDouble(entry.getValue());
                     break;
-                case "lon" :
+                case "lng" :
                     lon = readDouble(entry.getValue());
                     break;
                 case "banking" :

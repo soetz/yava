@@ -1,5 +1,7 @@
 package fr.soetz.android.yava;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,10 +19,10 @@ public final class JsonParser {
         Map<String, String> stationMap = new HashMap<String, String>();
         String pureJsonStation = jsonStation.replaceAll("(\\{|\\}|\n)", "");
 
+        pureJsonStation = ignoreCommaBetweenQuotes(pureJsonStation);
         String[] stationInformations = pureJsonStation.split(",");
         for(String infomation : stationInformations){
             String[] informationPair = infomation.split(":");
-            //TODO retirer les espaces au début des values
             stationMap.put(informationPair[informationPair.length - 2].replaceAll("( |\n|\")", ""), informationPair[informationPair.length - 1]);
         }
 
@@ -35,7 +37,7 @@ public final class JsonParser {
 
         int index = 0;
 
-        while(index < jsonStationsArray.length()){
+        while(index < jsonStationsArray.length() - 1){
             String elem = jsonStationsArray.substring(index, index + 1);
 
             while(!elem.equals("{")){
@@ -61,10 +63,33 @@ public final class JsonParser {
             }
 
             int end = index;
-            if(resultStations.size() == 31) break;
             resultStations.add(parseStation(jsonStationsArray.substring(start, end)));
         }
 
         return(resultStations);
+    }
+
+    private static String ignoreCommaBetweenQuotes(String input){
+        String result = "";
+
+        boolean betweenQuotes = false;
+
+        int index = 0;
+
+        while(index < input.length()){
+            String character = input.substring(index, index + 1);
+
+            if(character.equals("\"")){
+                betweenQuotes = !betweenQuotes;
+            }
+
+            if(!(character.equals(",") && betweenQuotes)){
+                result += character;
+            }
+
+            index += 1;
+        }
+
+        return(result);
     }
 }
