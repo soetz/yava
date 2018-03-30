@@ -29,9 +29,9 @@ public final class JsonParser {
         return(resultStation);
     }
 
-    public static List<Station> parseStations(String jsonStationsArray){
+    public static ArrayList<Station> parseStations(String jsonStationsArray){
 
-        List<Station> resultStations = new ArrayList<>();
+        ArrayList<Station> resultStations = new ArrayList<>();
 
         int index = 0;
 
@@ -61,7 +61,7 @@ public final class JsonParser {
             }
 
             int end = index;
-
+            if(resultStations.size() == 31) break;
             resultStations.add(parseStation(jsonStationsArray.substring(start, end)));
         }
 
