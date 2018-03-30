@@ -14,15 +14,15 @@ import javax.net.ssl.HttpsURLConnection;
  * Created by Thiago on 23/03/2018.
  */
 
-public class VelovAsyncTask extends AsyncTask<String, Void, String> {
+public class VelovAsyncTask extends AsyncTask<Object, Void, String> {
     
     @Override
-    protected String doInBackground(String... params) {
+    protected String doInBackground(Object... params) {
         BufferedReader in;
-        String urlString = params[0];
+        String urlString = (String) params[0];
         StringBuilder builder = new StringBuilder();
         String oneLine;
-        String response;
+        String response = null;
         URL url;
         HttpsURLConnection connection;
 
@@ -42,7 +42,7 @@ public class VelovAsyncTask extends AsyncTask<String, Void, String> {
             e.printStackTrace();
         }
 
-        return null;
+        return response;
     }
 
     @Override

@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         loadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new VelovAsyncTask().execute("url");
+                new VelovAsyncTask().execute("");
             }
         });
 
