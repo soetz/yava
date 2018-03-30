@@ -87,7 +87,6 @@ public class Station {
         }
 
         position = new Position(lat, lon);
-        Log.d("coucou", this.toString());
     }
 
     public int getNumber() {
