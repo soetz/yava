@@ -1,12 +1,15 @@
 package fr.soetz.android.yava;
 
 import android.os.AsyncTask;
+import android.widget.Adapter;
+import android.widget.ArrayAdapter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -15,16 +18,23 @@ import javax.net.ssl.HttpsURLConnection;
  */
 
 public class VelovAsyncTask extends AsyncTask<Object, Void, String> {
-    
+    ArrayAdapter myAdapter;
     @Override
     protected String doInBackground(Object... params) {
         BufferedReader in;
-        String urlString = (String) params[0];
-        StringBuilder builder = new StringBuilder();
+        String urlString;
+        StringBuilder builder;
         String oneLine;
-        String response = null;
+        String response = "";
         URL url;
         HttpsURLConnection connection;
+        ArrayList<Station> stationsList;
+
+
+        urlString = (String) params[0];
+        myAdapter = (ArrayAdapter) params[1];
+        stationsList = (ArrayList<Station>) params[2];
+        builder = new StringBuilder();
 
         try {
             url = new URL(urlString);
@@ -48,5 +58,6 @@ public class VelovAsyncTask extends AsyncTask<Object, Void, String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
+        myAdapter.notifyDataSetChanged();
     }
 }
