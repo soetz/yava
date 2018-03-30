@@ -1,8 +1,6 @@
 package fr.soetz.android.yava;
 
 import android.os.AsyncTask;
-import android.util.Log;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 
 import java.io.BufferedReader;
@@ -11,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -54,10 +53,6 @@ public class VelovAsyncTask extends AsyncTask<Object, Void, String> {
 
         stationsList = JsonParser.parseStations(response);
 
-        for(Station station : stationsList){
-            Log.d("station", station.toString());
-        }
-
         return response;
     }
 
@@ -65,6 +60,9 @@ public class VelovAsyncTask extends AsyncTask<Object, Void, String> {
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
         myAdapter.notifyDataSetChanged();
+    }
 
+    public List<Station> getStationsList(){
+        return(stationsList);
     }
 }
