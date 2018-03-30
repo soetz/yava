@@ -1,7 +1,10 @@
 package fr.soetz.android.yava;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,5 +29,44 @@ public final class JsonParser {
         resultStation = new Station(stationMap);
 
         return(resultStation);
+    }
+
+    public static List<Station> parseStations(String jsonStationsArray){
+
+        List<Station> resultStations = new ArrayList<>();
+
+        int index = 0;
+
+        while(index < jsonStationsArray.length()){
+            String elem = jsonStationsArray.substring(index, index + 1);
+
+            while(!elem.equals("{")){
+                index += 1;
+                elem = jsonStationsArray.substring(index, index + 1);
+            }
+
+            int start = index;
+            int level = 1;
+
+            index += 1;
+            elem = jsonStationsArray.substring(index, index + 1);
+
+            while(level > 0){
+                if(elem.equals("{")){
+                    level += 1;
+                }
+                else if(elem.equals("}")){
+                    level -= 1;
+                }
+                index += 1;
+                elem = jsonStationsArray.substring(index, index + 1);
+            }
+
+            int end = index;
+
+            resultStations.add(parseStation(jsonStationsArray.substring(start, end)));
+        }
+
+        return(resultStations);
     }
 }
