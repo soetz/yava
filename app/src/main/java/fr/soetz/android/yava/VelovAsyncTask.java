@@ -1,7 +1,7 @@
 package fr.soetz.android.yava;
 
 import android.os.AsyncTask;
-import android.widget.ArrayAdapter;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,7 +18,6 @@ import javax.net.ssl.HttpsURLConnection;
  */
 
 public class VelovAsyncTask extends AsyncTask<Object, Void, String> {
-    private ArrayAdapter myAdapter;
     private ArrayList<Station> stationsList;
     @Override
     protected String doInBackground(Object... params) {
@@ -31,8 +30,6 @@ public class VelovAsyncTask extends AsyncTask<Object, Void, String> {
         HttpsURLConnection connection;
 
         urlString = (String) params[0];
-        stationsList = (ArrayList<Station>) params[1];
-        myAdapter = (ArrayAdapter) params[2];
         builder = new StringBuilder();
 
         try {
@@ -59,10 +56,6 @@ public class VelovAsyncTask extends AsyncTask<Object, Void, String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        myAdapter.notifyDataSetChanged();
-    }
-
-    public List<Station> getStationsList(){
-        return(stationsList);
+        MapsActivity.updateStationsList(stationsList);
     }
 }
