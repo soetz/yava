@@ -1,21 +1,24 @@
 package fr.soetz.android.yava;
 
-import android.Manifest;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.ToggleButton;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -29,6 +32,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static GoogleMap mMap;
     private static List<Station> STATIONS_LIST;
     private static List<Marker> MARKERS_LIST = new ArrayList<Marker>();
+    private static String mode = "pickup";
     LocationManager locationManager;
 
     @Override
@@ -47,6 +51,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 new VelovAsyncTask().execute("https://api.jcdecaux.com/vls/v1/stations?contract=Lyon&apiKey=e89c4f407c7947e3be8c0f80de5252c69c3c38ad");
+            }
+        });
+
+        ToggleButton modeButton = (ToggleButton) findViewById(R.id.modeToggle);
+        modeButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                changeMode(isChecked);
             }
         });
     }
@@ -94,26 +106,77 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         MARKERS_LIST.clear();
 
         for(Station station : STATIONS_LIST){
-            BitmapDescriptor color;
+
+            int count = 0;
+
+            if(mode.equals("pickup")){
+                count = station.getAvailableBikes();
+            }
+            else if(mode.equals("deposit")){
+                count = station.getAvailableBikeStands();
+            }
+
+            Bitmap.Config conf = Bitmap.Config.ARGB_8888;
+            Bitmap bmp = Bitmap.createBitmap(80, 80, conf);
+            Canvas canvas1 = new Canvas(bmp);
+
+            // paint defines the text color, stroke width and size
+            Paint textColor = new Paint();
+            textColor.setTextSize(40);
+            textColor.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            textColor.setColor(Color.WHITE);
+
+            Paint backgroundColor = new Paint();
 
             if(station.getStatus().equals("OPEN")){
-                color = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
+                if(count == 0){
+                    backgroundColor.setColor(Color.rgb(173, 32, 32));
+                }
+                else if(count == 1){
+                    backgroundColor.setColor(Color.rgb(175, 119, 28));
+                }
+                else if(count == 2){
+                    backgroundColor.setColor(Color.rgb(175, 148, 28));
+                }
+                else if(count == 3){
+                    backgroundColor.setColor(Color.rgb(129, 140, 30));
+                }
+                else {
+                    backgroundColor.setColor(Color.rgb(95, 175, 77));
+                }
             }
             else if(station.getStatus().equals("CLOSED")){
-                color = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
+                backgroundColor.setColor(Color.rgb(173, 32, 32));
             }
             else {
-                color = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET);
+                backgroundColor.setColor(Color.GRAY);
             }
 
-            //Log.d("updateMap", station.toString());
+            canvas1.drawCircle(40, 40, 40, backgroundColor);
+
+            int xPos = 40 - (int)(textColor.measureText(new Integer(count).toString())/2);
+            int yPos = (int) ((canvas1.getHeight() / 2) - ((textColor.descent() + textColor.ascent()) / 2)) ;
+
+            canvas1.drawText(new Integer(count).toString(), xPos, yPos, textColor);
+
             LatLng coords = new LatLng(station.getPosition().getLatitude(), station.getPosition().getLongitude());
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(coords)
                     .title(station.getName())
-                    .icon(color));
+                    .icon(BitmapDescriptorFactory.fromBitmap(bmp)));
 
             MARKERS_LIST.add(marker);
         }
+    }
+
+    static protected void changeMode(boolean checked){
+        if(checked){
+            mode = "deposit";
+        }
+        else {
+            mode = "pickup";
+        }
+
+        updateMap();
     }
 }

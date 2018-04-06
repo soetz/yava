@@ -9,8 +9,6 @@
     </style>
 
     <style name="AppTheme" parent="AppBlankTheme">
-        <!-- Customize your theme here. -->
-        <!-- Base application thème. -->
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
     </style>
