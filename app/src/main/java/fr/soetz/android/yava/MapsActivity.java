@@ -10,9 +10,12 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -23,6 +26,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +82,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View v = inflater.inflate(R.layout.info_window, null);
+
+                TextView title = (TextView) v.findViewById(R.id.title);
+                title.setText(marker.getTitle());
+
+                try {
+                    JSONObject data = new JSONObject(marker.getSnippet());
+
+                    TextView status = (TextView) v.findViewById(R.id.status);
+                    status.setText("Statut : " + data.getString("status"));
+
+                    TextView address = (TextView) v.findViewById(R.id.address);
+                    address.setText("Adresse : " + data.getString("address"));
+
+                    TextView banking = (TextView) v.findViewById(R.id.banking);
+                    banking.setText("Borne de paiement : " + data.getString("banking"));
+
+                    TextView capacity = (TextView) v.findViewById(R.id.capacity);
+                    capacity.setText("Capacité : " + data.getString("capacity"));
+
+                    TextView bikes = (TextView) v.findViewById(R.id.bikes);
+                    bikes.setText("Vélos : " + data.getString("bikes"));
+
+                    TextView bikestands = (TextView) v.findViewById(R.id.bikestands);
+                    bikestands.setText("Places libres : " + data.getString("available"));
+                }
+                catch(Exception e){
+                }
+
+                return(v);
+            }
+        });
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                marker.showInfoWindow();
+                return false;
+            }
+        });
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -160,9 +216,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             canvas1.drawText(new Integer(count).toString(), xPos, yPos, textColor);
 
             LatLng coords = new LatLng(station.getPosition().getLatitude(), station.getPosition().getLongitude());
+            String banking = "Non";
+            if(station.isBanking()){
+                banking = "Oui";
+            }
+            String statut = "Inconnu";
+            if(station.getStatus().equals("OPEN")){
+                statut = "Ouvert";
+            }
+            else if(station.getStatus().equals("CLOSED")){
+                statut = "Fermé";
+            }
+
+            JSONObject data = new JSONObject();
+            try {
+                data.put("status", statut);
+                data.put("address", station.getAddress());
+                data.put("banking", banking);
+                data.put("capacity", station.getBikeStands());
+                data.put("bikes", station.getAvailableBikes());
+                data.put("available", station.getAvailableBikeStands());
+            }
+            catch(Exception e){
+
+            }
+
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(coords)
                     .title(station.getName())
+                    .snippet(data.toString())
                     .icon(BitmapDescriptorFactory.fromBitmap(bmp)));
 
             MARKERS_LIST.add(marker);
